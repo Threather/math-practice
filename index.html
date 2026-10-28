@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math Practice</title>
+<style>
+  :root { --bg:#f7f7fb; --fg:#1d1d27; --muted:#6b6b7a; --card:#fff; --yes:#1f9d55; --no:#d64545; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#15151c; --fg:#ececf3; --muted:#9a9aab; --card:#1f1f29; } }
+  :root[data-theme="dark"] { --bg:#15151c; --fg:#ececf3; --muted:#9a9aab; --card:#1f1f29; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--fg);
+         font-family:system-ui,sans-serif; padding:16px; }
+  .card { background:var(--card); border-radius:20px; padding:32px 24px; width:100%; max-width:420px; text-align:center;
+          box-shadow:0 4px 24px rgba(0,0,0,.08); }
+  .score { color:var(--muted); font-size:15px; }
+  .q { font-size:clamp(40px,12vw,56px); font-weight:700; margin:28px 0 8px; font-variant-numeric:tabular-nums; }
+  .hint { color:var(--muted); margin-bottom:24px; }
+  .row { display:flex; gap:12px; }
+  input { flex:1; min-width:0; font-size:28px; padding:14px; border-radius:14px; border:2px solid var(--muted);
+          background:transparent; color:var(--fg); text-align:center; }
+  button { font-size:22px; font-weight:600; padding:14px 22px; border:0; border-radius:14px; color:#fff;
+           background:var(--yes); cursor:pointer; }
+  .fb { min-height:28px; margin-top:20px; font-size:18px; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="score">Score <span id="score">0 / 0</span> · Streak <span id="streak">0</span></div>
+  <div class="q" id="q"></div>
+  <div class="hint">Type your answer and press Enter</div>
+  <form class="row" id="form">
+    <input id="ans" type="number" inputmode="numeric" autocomplete="off" autofocus>
+    <button>Check</button>
+  </form>
+  <div class="fb" id="fb"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+let current, correct = 0, total = 0, streak = 0, locked = false;
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function makeQuestion() {
+  const op = ['+', '−', '×', '÷'][randInt(0, 3)];
+  let a, b, answer;
+  if (op === '+') { a = randInt(1, 100); b = randInt(1, 100); answer = a + b; }
+  if (op === '−') { a = randInt(1, 100); b = randInt(1, a); answer = a - b; }
+  if (op === '×') { a = randInt(1, 12); b = randInt(1, 12); answer = a * b; }
+  if (op === '÷') { b = randInt(1, 12); answer = randInt(1, 12); a = b * answer; }
+  return { a, op, b, answer };
+}
+
+function render(q) {
+  $('q').textContent = `${q.a} ${q.op} ${q.b} = ?`;
+  $('fb').textContent = '';
+  $('ans').value = '';
+  $('ans').focus();
+  locked = false;
+}
+
+function check(value) {
+  if (locked || value === '') return;
+  locked = true;
+  const right = Number(value) === current.answer;
+  total++;
+  if (right) { correct++; streak++; } else { streak = 0; }
+  $('score').textContent = `${correct} / ${total}`;
+  $('streak').textContent = streak;
+  const c = current;
+  $('fb').style.color = right ? 'var(--yes)' : 'var(--no)';
+  $('fb').textContent = right ? 'Correct!' : `Wrong — ${c.a} ${c.op} ${c.b} = ${c.answer}`;
+  setTimeout(next, right ? 700 : 1600);
+}
+
+function next() {
+  current = makeQuestion();
+  render(current);
+}
+
+$('form').onsubmit = e => { e.preventDefault(); check($('ans').value); };
+next();
+</script>
+</body>
+</html>
