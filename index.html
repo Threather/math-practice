@@ -5,36 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Math Practice</title>
 <style>
-  :root { --bg:#f7f7fb; --fg:#1d1d27; --muted:#6b6b7a; --card:#fff; --yes:#1f9d55; --no:#d64545; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#15151c; --fg:#ececf3; --muted:#9a9aab; --card:#1f1f29; } }
-  :root[data-theme="dark"] { --bg:#15151c; --fg:#ececf3; --muted:#9a9aab; --card:#1f1f29; }
+  :root { --bg:#fafafa; --fg:#111; --muted:#a0a0a0; --line:#e0e0e0; --yes:#2e9e5b; --no:#d9534f; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#0e0e10; --fg:#f2f2f2; --muted:#5c5c63; --line:#26262b; } }
+  :root[data-theme="dark"] { --bg:#0e0e10; --fg:#f2f2f2; --muted:#5c5c63; --line:#26262b; }
   * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--fg);
-         font-family:system-ui,sans-serif; padding:16px; }
-  .card { background:var(--card); border-radius:20px; padding:32px 24px; width:100%; max-width:420px; text-align:center;
-          box-shadow:0 4px 24px rgba(0,0,0,.08); }
-  .score { color:var(--muted); font-size:15px; }
-  .q { font-size:clamp(40px,12vw,56px); font-weight:700; margin:28px 0 8px; font-variant-numeric:tabular-nums; }
-  .hint { color:var(--muted); margin-bottom:24px; }
-  .row { display:flex; gap:12px; }
-  input { flex:1; min-width:0; font-size:28px; padding:14px; border-radius:14px; border:2px solid var(--muted);
-          background:transparent; color:var(--fg); text-align:center; }
-  button { font-size:22px; font-weight:600; padding:14px 22px; border:0; border-radius:14px; color:#fff;
-           background:var(--yes); cursor:pointer; }
-  .fb { min-height:28px; margin-top:20px; font-size:18px; font-weight:600; }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+         background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif; padding:16px; }
+  .score { position:fixed; top:24px; font-size:13px; letter-spacing:.08em; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .q { font-size:clamp(44px,11vw,88px); font-weight:300; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  input { margin-top:32px; width:min(240px,80vw); font:inherit; font-size:40px; font-weight:300; text-align:center;
+          color:var(--fg); background:transparent; border:0; border-bottom:1px solid var(--line); padding:8px 0;
+          outline:none; transition:border-color .2s; -moz-appearance:textfield; }
+  input:focus { border-bottom-color:var(--fg); }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .fb { height:24px; margin-top:24px; font-size:15px; }
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="score">Score <span id="score">0 / 0</span> · Streak <span id="streak">0</span></div>
-  <div class="q" id="q"></div>
-  <div class="hint">Type your answer and press Enter</div>
-  <form class="row" id="form">
-    <input id="ans" type="number" inputmode="numeric" autocomplete="off" autofocus>
-    <button>Check</button>
-  </form>
-  <div class="fb" id="fb"></div>
-</div>
+<div class="score"><span id="score">0 / 0</span> &nbsp;·&nbsp; streak <span id="streak">0</span></div>
+<div class="q" id="q"></div>
+<form id="form">
+  <input id="ans" type="number" inputmode="numeric" autocomplete="off" autofocus>
+</form>
+<div class="fb" id="fb"></div>
 <script>
 const $ = id => document.getElementById(id);
 let current, correct = 0, total = 0, streak = 0, locked = false;
@@ -54,7 +47,7 @@ function makeQuestion() {
 }
 
 function render(q) {
-  $('q').textContent = `${q.a} ${q.op} ${q.b} = ?`;
+  $('q').textContent = `${q.a} ${q.op} ${q.b}`;
   $('fb').textContent = '';
   $('ans').value = '';
   $('ans').focus();
@@ -71,7 +64,7 @@ function check(value) {
   $('streak').textContent = streak;
   const c = current;
   $('fb').style.color = right ? 'var(--yes)' : 'var(--no)';
-  $('fb').textContent = right ? 'Correct!' : `Wrong — ${c.a} ${c.op} ${c.b} = ${c.answer}`;
+  $('fb').textContent = right ? 'Correct' : `${c.a} ${c.op} ${c.b} = ${c.answer}`;
   setTimeout(next, right ? 700 : 1600);
 }
 
