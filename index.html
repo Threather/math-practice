@@ -2,71 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Math Practice</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
 <style>
-  /* Layout: a sum written in column form on graph paper, the way it's done by hand */
-  :root {
-    --paper:#fbfcfd; --grid:#e3eaf2; --ink:#1b2430; --pencil:#8592a3; --right:#2f8a57; --wrong:#c8423b;
-    --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-    --sans:"IBM Plex Sans", system-ui, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-    --paper:#11161d; --grid:#1b232d; --ink:#e7ecf2; --pencil:#66727f; --right:#5cc68a; --wrong:#ef6e66; color-scheme:dark; } }
-  :root[data-theme="dark"] {
-    --paper:#11161d; --grid:#1b232d; --ink:#e7ecf2; --pencil:#66727f; --right:#5cc68a; --wrong:#ef6e66; color-scheme:dark; }
-
+  :root { --bg:#fafafa; --fg:#111; --muted:#a0a0a0; --line:#e0e0e0; --yes:#2e9e5b; --no:#d9534f; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#0e0e10; --fg:#f2f2f2; --muted:#5c5c63; --line:#26262b; } }
+  :root[data-theme="dark"] { --bg:#0e0e10; --fg:#f2f2f2; --muted:#5c5c63; --line:#26262b; }
   * { box-sizing:border-box; }
-  html, body { height:100%; }
-  body {
-    margin:0; display:grid; place-items:center;
-    padding-block:24px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
-    background-color:var(--paper); color:var(--ink); font-family:var(--sans);
-    background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size:28px 28px;
-  }
-  .score {
-    position:fixed; top:calc(20px + env(safe-area-inset-top, 0px)); left:0; right:0; text-align:center;
-    font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--pencil);
-  }
-  .score b { font-family:var(--mono); font-weight:500; color:var(--ink); letter-spacing:0; }
-
-  .sum {
-    font-family:var(--mono); font-size:clamp(48px, 13vw, 84px); line-height:1.15;
-    font-variant-numeric:tabular-nums; display:grid; justify-items:end; width:5.5ch;
-  }
-  .sum .op { color:var(--pencil); margin-right:.5ch; }
-  .rule { width:100%; height:2px; background:var(--ink); margin:8px 0 4px; }
-  input {
-    width:100%; font:inherit; text-align:right; color:var(--ink); background:transparent;
-    border:0; padding:0; outline:none; caret-color:var(--pencil); -moz-appearance:textfield;
-  }
-  input::placeholder { color:var(--grid); }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+         background:var(--bg); color:var(--fg); font-family:system-ui,sans-serif; padding:16px; }
+  .score { position:fixed; top:24px; font-size:13px; letter-spacing:.08em; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .q { font-size:clamp(44px,11vw,88px); font-weight:300; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  input { margin-top:32px; width:min(240px,80vw); font:inherit; font-size:40px; font-weight:300; text-align:center;
+          color:var(--fg); background:transparent; border:0; border-bottom:1px solid var(--line); padding:8px 0;
+          outline:none; transition:border-color .2s; -moz-appearance:textfield; }
+  input:focus { border-bottom-color:var(--fg); }
   input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
-  .sum.right input { color:var(--right); }
-  .sum.wrong input { color:var(--wrong); text-decoration:line-through; text-decoration-thickness:3px; }
-
-  .fb { height:20px; margin-top:20px; font-size:15px; color:var(--pencil); text-align:right; font-family:var(--mono); }
-  .fb.wrong { color:var(--wrong); }
-  .fb.right { color:var(--right); }
-  .wrap { display:grid; }
+  .fb { height:24px; margin-top:24px; font-size:15px; }
 </style>
 </head>
 <body>
-<div class="score">Score <b id="score">0/0</b> &nbsp; Streak <b id="streak">0</b></div>
-<div class="wrap">
-  <form class="sum" id="form">
-    <div id="a"></div>
-    <div><span class="op" id="op"></span><span id="b"></span></div>
-    <div class="rule"></div>
-    <input id="ans" type="number" inputmode="numeric" autocomplete="off" placeholder="?" autofocus aria-label="Your answer">
-  </form>
-  <div class="fb" id="fb"></div>
-</div>
+<div class="score"><span id="score">0 / 0</span> &nbsp;·&nbsp; streak <span id="streak">0</span></div>
+<div class="q" id="q"></div>
+<form id="form">
+  <input id="ans" type="number" inputmode="numeric" autocomplete="off" autofocus>
+</form>
+<div class="fb" id="fb"></div>
 <script>
 const $ = id => document.getElementById(id);
 let current, correct = 0, total = 0, streak = 0, locked = false;
@@ -86,11 +47,7 @@ function makeQuestion() {
 }
 
 function render(q) {
-  $('a').textContent = q.a;
-  $('op').textContent = q.op;
-  $('b').textContent = q.b;
-  $('form').className = 'sum';
-  $('fb').className = 'fb';
+  $('q').textContent = `${q.a} ${q.op} ${q.b}`;
   $('fb').textContent = '';
   $('ans').value = '';
   $('ans').focus();
@@ -103,11 +60,11 @@ function check(value) {
   const right = Number(value) === current.answer;
   total++;
   if (right) { correct++; streak++; } else { streak = 0; }
-  $('score').textContent = `${correct}/${total}`;
+  $('score').textContent = `${correct} / ${total}`;
   $('streak').textContent = streak;
-  $('form').className = 'sum ' + (right ? 'right' : 'wrong');
-  $('fb').className = 'fb ' + (right ? 'right' : 'wrong');
-  $('fb').textContent = right ? 'correct' : `answer: ${current.answer}`;
+  const c = current;
+  $('fb').style.color = right ? 'var(--yes)' : 'var(--no)';
+  $('fb').textContent = right ? 'Correct' : `${c.a} ${c.op} ${c.b} = ${c.answer}`;
   setTimeout(next, right ? 700 : 1600);
 }
 
